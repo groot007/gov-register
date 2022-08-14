@@ -1,6 +1,7 @@
-const cron = require("node-cron");
-const express = require("express");
-const path = require("path");
+import fetch from "node-fetch";
+import cron from "node-cron";
+import express from "express";
+import path from "path";
 
 const app = express();
 const port = 8081;

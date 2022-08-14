@@ -1,3 +1,18 @@
+const cron = require("node-cron");
+const express = require("express");
+const path = require("path");
+
+const app = express();
+const port = 8081;
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "/index.html"));
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
+
 const fetchData = async () => {
   let dates = "";
 
@@ -34,8 +49,8 @@ const fetchData = async () => {
   }
 };
 
-fetchData();
-
-setInterval(() => {
+cron.schedule("*/30 * * * * *", function () {
+  console.log("---------------------");
+  console.log("Running Cron Job");
   fetchData();
-}, 1000 * 60 * 2);
+});

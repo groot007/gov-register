@@ -4,6 +4,7 @@ import express from "express";
 import path from "path";
 import TelegramBot from "node-telegram-bot-api";
 import e from "express";
+import http from "http";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,7 +18,6 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
 
-var http = require("http");
 setInterval(function () {
   http.get("https://gov-register.herokuapp.com");
 }, 300000); // every 5 minutes (300000)

@@ -57,7 +57,7 @@ const token = "5302389993:AAHp5CTEDs33g-YMKF7Z6sevI_nq4ehaWGE";
 const bot = new TelegramBot(token, { polling: true });
 let chatId = undefined;
 
-const fetchData = async () => {
+const fetchData = async (isCron) => {
   return await fetch(
     "https://registration.mfa.gov.ua/qmaticwebbooking/rest/schedule/branches/5a78cad444c63e9ad53b3f14e4049dd60c73c591361544be919e9689c4472dc3/dates;servicePublicId=2099da0454ce78dd0d10abf4113f42b9ff90d8566441acdd036a0ef027ad8fc2;customSlotLength=10"
   )
@@ -76,7 +76,7 @@ const fetchData = async () => {
         );
       }
 
-      if (!dates && chatId) {
+      if (!dates && chatId && !isCron) {
         bot.sendMessage(
           chatId,
           "Нажаль доступних дат немає - ми повідомимо про нові дати",
@@ -89,7 +89,7 @@ const fetchData = async () => {
 const fetching = cron.schedule("*/20 * * * * *", function () {
   console.log("---------------------");
   console.log("Running Cron Job");
-  fetchData();
+  fetchData(isCron);
 });
 
 bot.on("message", (msg) => {
@@ -106,7 +106,7 @@ bot.on("message", (msg) => {
   if (msg.text === stopFetching) {
     bot.sendMessage(
       chatId,
-      "Пошук дат припинено \n виберіть дію для продовження...",
+      "Пошук дат припинено \nвиберіть дію для продовження...",
       buttonCheck
     );
     fetching.stop();

@@ -23,7 +23,7 @@ setInterval(function () {
 }, 300000); // every 5 minutes (300000)
 
 const checkDates = "Перевірити вільні дати (паспорт до 18 років)";
-const checkLater = "Перевіряти кожну хвилину";
+const stopFetching = "Зупинити пошук дат";
 
 const buttonCheck = {
   reply_markup: {
@@ -39,13 +39,13 @@ const buttonCheck = {
   },
 };
 
-const buttonCheckLater = {
+const stopFetchingButton = {
   reply_markup: {
     resize_keyboard: true,
     keyboard: [
       [
         {
-          text: checkLater,
+          text: stopFetching,
           callback_data: "check_later",
         },
       ],
@@ -54,51 +54,55 @@ const buttonCheckLater = {
 };
 
 const token = "5302389993:AAHp5CTEDs33g-YMKF7Z6sevI_nq4ehaWGE";
-
-// Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
+let chatId = undefined;
 
 const fetchData = async () => {
   return await fetch(
     "https://registration.mfa.gov.ua/qmaticwebbooking/rest/schedule/branches/5a78cad444c63e9ad53b3f14e4049dd60c73c591361544be919e9689c4472dc3/dates;servicePublicId=2099da0454ce78dd0d10abf4113f42b9ff90d8566441acdd036a0ef027ad8fc2;customSlotLength=10"
-  ).then(function (response) {
-    return response.json();
-  });
+  )
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      const dates = data.length ? data.map((el) => el.date).join(". ") : "";
+
+      if (chatId) {
+        bot.sendMessage(chatId, "chat id is " + chatId);
+      }
+
+      if (dates && chatId) {
+        bot.sendMessage(chatId, "Доступні дати " + dates, stopFetchingButton);
+      }
+
+      if (!dates && chatId) {
+        bot.sendMessage(
+          chatId,
+          "Нажаль доступних дат немає - ми повідомимо про нові дати",
+          stopFetchingButton
+        );
+      }
+    });
 };
 
-const sendMessage = (chatId, isCron) => {
-  fetchData().then(function (data) {
-    const dates = data.length ? data.map((el) => el.date).join(". ") : "";
-
-    if (dates) {
-      bot.sendMessage(chatId, "Доступні дати " + dates);
-    } else if (!isCron) {
-      console.log("dates - ", dates);
-      bot.sendMessage(
-        chatId,
-        "Нажаль доступних дат немає - ми повідомимо про нові дати",
-        buttonCheckLater
-      );
-    }
-  });
-};
+const fetching = cron.schedule("*/20 * * * * *", function () {
+  console.log("---------------------");
+  console.log("Running Cron Job");
+  fetchData();
+});
 
 bot.on("message", (msg) => {
-  const chatId = msg.chat.id;
-  // send a message to the chat acknowledging receipt of their message
+  chatId = msg.chat.id;
+
   if (msg.text === "/start") {
     bot.sendMessage(chatId, "Виберіть опцію: ", buttonCheck);
   }
 
   if (msg.text === checkDates) {
-    sendMessage(chatId);
+    fetchData();
   }
 
-  if (msg.text === checkLater) {
-    cron.schedule("*/20 * * * * *", function () {
-      console.log("---------------------");
-      console.log("Running Cron Job");
-      sendMessage(chatId, true);
-    });
+  if (msg.text === stopFetching) {
+    fetching.stop();
   }
 });

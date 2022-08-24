@@ -19,7 +19,7 @@ app.listen(port, () => {
 });
 
 setInterval(function () {
-  http.get("https://gov-register.herokuapp.com");
+  http.get("http://gov-register.herokuapp.com");
 }, 300000); // every 5 minutes (300000)
 
 const checkDates = "Перевірити вільні дати (паспорт до 18 років)";

@@ -101,6 +101,7 @@ bot.on("message", (msg) => {
 
   if (msg.text === checkDates) {
     fetchData();
+    fetching.start();
   }
 
   if (msg.text === stopFetching) {

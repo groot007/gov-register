@@ -67,12 +67,8 @@ const fetchData = async () => {
     .then(function (data) {
       const dates = data.length ? data.map((el) => el.date).join(". ") : "";
 
-      if (chatId) {
-        bot.sendMessage(chatId, "chat id is " + chatId);
-      }
-
       if (dates && chatId) {
-        bot.sendMessage(chatId, "Доступні дати " + dates, stopFetchingButton);
+        bot.sendMessage(chatId, "Доступні дати " + dates);
       }
 
       if (!dates && chatId) {
@@ -80,6 +76,11 @@ const fetchData = async () => {
           chatId,
           "Нажаль доступних дат немає - ми повідомимо про нові дати",
           stopFetchingButton
+        );
+        bot.sendMessage(
+          chatId,
+          "Зареєстурйтесь \n <a href='https://registration.mfa.gov.ua/qmaticwebbooking/#/'>https://registration.mfa.gov.ua</a>",
+          { parse_mode: "HTML" }
         );
       }
     });
@@ -103,6 +104,7 @@ bot.on("message", (msg) => {
   }
 
   if (msg.text === stopFetching) {
+    bot.sendMessage(chatId, "Пошук дат припинено", buttonCheck);
     fetching.stop();
   }
 });

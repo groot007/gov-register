@@ -67,8 +67,6 @@ const fetchData = async (isCron) => {
     .then(function (data) {
       const dates = data.length ? data.map((el) => el.date).join(". ") : "";
 
-      console.log("CHAT ID", chatId);
-
       if (dates && chatId) {
         bot.sendMessage(chatId, "Доступні дати " + dates);
         bot.sendMessage(
@@ -81,7 +79,7 @@ const fetchData = async (isCron) => {
       if (!dates && chatId && !isCron) {
         bot.sendMessage(
           chatId,
-          "Нажаль доступних дат немає - ми повідомимо про нові дати",
+          "Нажаль доступних дат немає - ми повідомимо про нові дати (перевірка кожні 20 секунд)",
           stopFetchingButton
         );
       }
@@ -91,6 +89,7 @@ const fetchData = async (isCron) => {
 const fetching = cron.schedule("*/20 * * * * *", function () {
   console.log("---------------------");
   console.log("Running Cron Job");
+  console.log("CHAT ID", chatId);
   fetchData(isCron);
 });
 

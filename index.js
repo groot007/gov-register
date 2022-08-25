@@ -67,6 +67,8 @@ const fetchData = async (isCron) => {
     .then(function (data) {
       const dates = data.length ? data.map((el) => el.date).join(". ") : "";
 
+      console.log("CHAT ID", chatId);
+
       if (dates && chatId) {
         bot.sendMessage(chatId, "Доступні дати " + dates);
         bot.sendMessage(
@@ -101,7 +103,6 @@ bot.on("message", (msg) => {
 
   if (msg.text === checkDates) {
     fetchData();
-    fetching.start();
   }
 
   if (msg.text === stopFetching) {
@@ -110,6 +111,16 @@ bot.on("message", (msg) => {
       "Пошук дат припинено \nвиберіть дію для продовження...",
       buttonCheck
     );
+
+    chatId = null;
+  }
+
+  // internal usage only
+  if (msg.text === "stop cron") {
     fetching.stop();
+  }
+
+  if (msg.text === "start cron") {
+    fetching.start();
   }
 });
